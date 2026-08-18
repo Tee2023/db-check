@@ -41,6 +41,79 @@ php artisan boost:install
 
 Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
 
+## Database Schema Checker (`db:fix-missing`)
+
+เครื่องมือช่วย Backend Developer ตรวจสอบว่า Database จริงตรงกับ Schema ที่กำหนดไว้ในโค้ด (`database/Schema/*.php`) หรือไม่ ถ้าพบ Column ที่หายไป, Type ไม่ตรง, หรือ Table หายไป จะช่วยสร้าง Migration ให้อัตโนมัติ แก้ปัญหา "database ไม่ตรงกับที่ dev คนอื่นแก้ไว้" หลัง pull โค้ดใหม่
+
+### 0. ติดตั้ง Dependencies (ครั้งแรกหลัง clone)
+
+```bash
+composer install
+cp .env.example .env
+php artisan key:generate
+```
+
+จากนั้นตั้งค่า `.env` ให้ตรงกับ Database ของเครื่องตัวเอง (`DB_CONNECTION`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`)
+
+### 1. เริ่มต้น MySQL
+
+ก่อนใช้งาน Laravel และตรวจสอบ Database ให้ตรวจสอบว่า MySQL ทำงานอยู่ก่อน
+
+```bash
+brew services start mysql
+```
+
+หาก MySQL ทำงานสำเร็จ จะขึ้นประมาณ:
+
+```
+Successfully started `mysql`
+```
+
+ตรวจสอบสถานะ MySQL:
+
+```bash
+brew services list
+```
+
+ควรเห็น:
+
+```
+mysql started
+```
+
+### 2. ตรวจสอบอย่างเดียว (Dry Run)
+
+```bash
+php artisan db:fix-missing --dry-run
+```
+
+### 3. ตรวจ + สร้าง Migration
+
+```bash
+php artisan db:fix-missing
+```
+
+### 4. เปิดดู Migration ที่สร้าง
+
+```
+database/migrations/xxxx_xx_xx_xxxxxx_fix_missing_database_schema.php
+```
+
+### 5. ตรวจสอบ SQL/Schema ให้เรียบร้อย
+
+เปิดไฟล์ Migration ที่สร้างขึ้น ตรวจสอบ Column/Type ให้ถูกต้องก่อน Run จริง
+
+### 6. Run Migration
+
+```bash
+php artisan migrate
+```
+
+> Tip: ใช้ flag `--run` เพื่อ Run Migration ทันทีหลังสร้าง โดยไม่ต้องรันคำสั่งแยก:
+> ```bash
+> php artisan db:fix-missing --run
+> ```
+
 ## Contributing
 
 Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
