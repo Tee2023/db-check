@@ -81,29 +81,39 @@ brew services list
 mysql started
 ```
 
-### 2. ตรวจสอบอย่างเดียว (Dry Run)
+### 2. Run Migration พื้นฐานของโปรเจกต์ (ครั้งแรกหลัง clone)
+
+ก่อนตรวจสอบ Schema ต้องมั่นใจก่อนว่า Database มีตารางพื้นฐานของ Laravel (`users`, `cache`, `jobs` ฯลฯ) อยู่แล้ว ถ้ายังไม่เคย Migrate บนเครื่องนี้มาก่อน ให้รัน:
+
+```bash
+php artisan migrate
+```
+
+> หมายเหตุ: นี่คือการ Migrate ตารางพื้นฐานของโปรเจกต์ ไม่ใช่ Migration ที่ `db:fix-missing` สร้างขึ้น (อันนั้นจะรันในขั้นตอนที่ 6)
+
+### 3. ตรวจสอบอย่างเดียว (Dry Run)
 
 ```bash
 php artisan db:fix-missing --dry-run
 ```
 
-### 3. ตรวจ + สร้าง Migration
+### 4. ตรวจ + สร้าง Migration
 
 ```bash
 php artisan db:fix-missing
 ```
 
-### 4. เปิดดู Migration ที่สร้าง
+### 5. เปิดดู Migration ที่สร้าง
 
 ```
 database/migrations/xxxx_xx_xx_xxxxxx_fix_missing_database_schema.php
 ```
 
-### 5. ตรวจสอบ SQL/Schema ให้เรียบร้อย
+### 6. ตรวจสอบ SQL/Schema ให้เรียบร้อย
 
 เปิดไฟล์ Migration ที่สร้างขึ้น ตรวจสอบ Column/Type ให้ถูกต้องก่อน Run จริง
 
-### 6. Run Migration
+### 7. Run Migration
 
 ```bash
 php artisan migrate
