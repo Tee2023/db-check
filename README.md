@@ -1,49 +1,18 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# DB Check
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Internal Laravel tool สำหรับตรวจสอบและซ่อมแซม Database Schema ให้ตรงกับ Schema ที่กำหนดไว้ในโค้ด ใช้แก้ปัญหา "database ไม่ตรงกับที่ dev คนอื่นแก้ไว้" หลัง pull โค้ดใหม่
 
-## About Laravel
+## Prerequisites
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
-
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
-
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
-```
-
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+- PHP `^8.3`
+- Composer
+- MySQL
+- Laravel Framework `^13.17` (ติดตั้งผ่าน Composer อัตโนมัติ)
 
 ## Database Schema Checker (`db:fix-missing`)
 
 เครื่องมือช่วย Backend Developer ตรวจสอบว่า Database จริงตรงกับ Schema ที่กำหนดไว้ในโค้ด (`database/Schema/*.php`) หรือไม่ ถ้าพบ Column ที่หายไป, Type ไม่ตรง, หรือ Table หายไป จะช่วยสร้าง Migration ให้อัตโนมัติ แก้ปัญหา "database ไม่ตรงกับที่ dev คนอื่นแก้ไว้" หลัง pull โค้ดใหม่
+
 
 ### 0. ติดตั้ง Dependencies (ครั้งแรกหลัง clone)
 
@@ -124,18 +93,39 @@ php artisan migrate
 > php artisan db:fix-missing --run
 > ```
 
-## Contributing
+### สรุป Options ของคำสั่ง
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+| Option | คำอธิบาย |
+|---|---|
+| (ไม่มี option) | ตรวจสอบ Schema และสร้าง Migration ถ้าพบความแตกต่าง |
+| `--dry-run` | ตรวจสอบอย่างเดียว ไม่สร้าง Migration และไม่แก้ Database |
+| `--run` | สร้าง Migration แล้ว Run ทันที (มี prompt ยืนยันก่อน) |
 
-## Code of Conduct
+## การเพิ่ม/แก้ Schema ที่คาดหวัง
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Schema ที่ใช้เทียบกับ Database จริงถูกกำหนดไว้ที่ `database/Schema/*.php` (เช่น `UserSchema.php`, `PostSchema.php`) แต่ละไฟล์มี method `definition()` คืนค่าเป็น array ของ column โดยแต่ละ column กำหนด key ได้ดังนี้:
 
-## Security Vulnerabilities
+- `type` — ชนิดข้อมูล เช่น `bigInteger`, `string`, `text`, `boolean`, `date`, `timestamp`, `enum`
+- `length` — ความยาว (สำหรับ `string`)
+- `nullable` — `true`/`false`
+- `default` — ค่า default
+- `unsigned`, `autoIncrement`, `primary` — ใช้กับ column `id`
+- `values` — รายการค่าที่เป็นไปได้ (สำหรับ `enum`)
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+ตัวอย่างจาก `PostSchema.php`:
 
-## License
+```php
+'status' => [
+    'type' => 'enum',
+    'values' => ['draft', 'published', 'archived'],
+    'nullable' => false,
+    'default' => 'draft',
+],
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+เมื่อเพิ่ม Table ใหม่ ให้สร้างไฟล์ Schema ใหม่ในโฟลเดอร์นี้ แล้วเพิ่มลงใน `getExpectedSchema()` ของ `app/Console/Commands/FixMissingColumns.php`
+
+## Known Issues
+
+- Migration ที่ `db:fix-missing` สร้างขึ้นในปัจจุบันใช้ `Schema::create()` เสมอ ถ้า Table นั้นมีอยู่แล้วใน Database (เช่น `users`) การรัน `php artisan migrate` จะ **fail** ด้วย error `Table 'xxx' already exists` ก่อนรัน Migration ที่สร้างขึ้น ให้เปิดไฟล์ตรวจสอบและแก้เป็น `Schema::table()` + `addColumn()` สำหรับ Table ที่มีอยู่แล้ว
+
