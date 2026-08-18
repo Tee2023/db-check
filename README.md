@@ -24,6 +24,8 @@ php artisan key:generate
 
 จากนั้นตั้งค่า `.env` ให้ตรงกับ Database ของเครื่องตัวเอง (`DB_CONNECTION`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`)
 
+> หมายเหตุ: `.env.example` ตั้งค่า default เป็น `DB_CONNECTION=sqlite` แต่โปรเจกต์นี้ใช้ MySQL ต้องแก้เป็น `DB_CONNECTION=mysql` และเปิด comment `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` ให้ตรงกับเครื่องตัวเอง
+
 ### 1. เริ่มต้น MySQL
 
 ก่อนใช้งาน Laravel และตรวจสอบ Database ให้ตรวจสอบว่า MySQL ทำงานอยู่ก่อน
@@ -50,7 +52,17 @@ brew services list
 mysql started
 ```
 
-### 2. Run Migration พื้นฐานของโปรเจกต์ (ครั้งแรกหลัง clone)
+### 2. สร้าง Database
+
+`php artisan migrate` จะสร้างได้แค่ Table เท่านั้น ไม่ได้สร้าง Database ให้เอง ต้องสร้าง Database ตามชื่อที่ตั้งไว้ใน `DB_DATABASE` (ใน `.env`) เองก่อน เช่น:
+
+```bash
+mysql -u root -e "CREATE DATABASE IF NOT EXISTS dbCheck"
+```
+
+> เปลี่ยน `dbCheck` เป็นชื่อที่ตรงกับ `DB_DATABASE` ใน `.env` ของตัวเอง
+
+### 3. Run Migration พื้นฐานของโปรเจกต์ (ครั้งแรกหลัง clone)
 
 ก่อนตรวจสอบ Schema ต้องมั่นใจก่อนว่า Database มีตารางพื้นฐานของ Laravel (`users`, `cache`, `jobs` ฯลฯ) อยู่แล้ว ถ้ายังไม่เคย Migrate บนเครื่องนี้มาก่อน ให้รัน:
 
@@ -58,31 +70,32 @@ mysql started
 php artisan migrate
 ```
 
-> หมายเหตุ: นี่คือการ Migrate ตารางพื้นฐานของโปรเจกต์ ไม่ใช่ Migration ที่ `db:fix-missing` สร้างขึ้น (อันนั้นจะรันในขั้นตอนที่ 6)
+> หมายเหตุ: นี่คือการ Migrate ตารางพื้นฐานของโปรเจกต์ ไม่ใช่ Migration ที่ `db:fix-missing` สร้างขึ้น (อันนั้นจะรันในขั้นตอนที่ 8)
 
-### 3. ตรวจสอบอย่างเดียว (Dry Run)
+### 4. ตรวจสอบอย่างเดียว (Dry Run)
 
 ```bash
 php artisan db:fix-missing --dry-run
 ```
 
-### 4. ตรวจ + สร้าง Migration
+### 5. ตรวจ + สร้าง Migration
 
 ```bash
 php artisan db:fix-missing
 ```
 
-### 5. เปิดดู Migration ที่สร้าง
+### 6. เปิดดู Migration ที่สร้าง
 
 ```
 database/migrations/xxxx_xx_xx_xxxxxx_fix_missing_database_schema.php
 ```
 
-### 6. ตรวจสอบ SQL/Schema ให้เรียบร้อย
+### 7. ตรวจสอบ SQL/Schema ให้เรียบร้อย
 
 เปิดไฟล์ Migration ที่สร้างขึ้น ตรวจสอบ Column/Type ให้ถูกต้องก่อน Run จริง
 
-### 7. Run Migration
+### 8. Run Migration
+
 
 ```bash
 php artisan migrate
