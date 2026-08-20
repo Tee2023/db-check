@@ -140,5 +140,5 @@ Schema ที่ใช้เทียบกับ Database จริงถูก
 
 ## Known Issues
 
-- Migration ที่ `db:fix-missing` สร้างขึ้นในปัจจุบันใช้ `Schema::create()` เสมอ ถ้า Table นั้นมีอยู่แล้วใน Database (เช่น `users`) การรัน `php artisan migrate` จะ **fail** ด้วย error `Table 'xxx' already exists` ก่อนรัน Migration ที่สร้างขึ้น ให้เปิดไฟล์ตรวจสอบและแก้เป็น `Schema::table()` + `addColumn()` สำหรับ Table ที่มีอยู่แล้ว
+- Column ที่ตรวจพบว่าเป็น "EXTRA COLUMN" (มีใน Database แต่ไม่มีใน Schema ที่กำหนด) จะถูกแจ้งเตือนใน Console เท่านั้น เครื่องมือจะ **ไม่ลบ** Column นั้นให้อัตโนมัติ (เพื่อความปลอดภัย ป้องกันข้อมูลหาย) หากต้องการลบ ให้แก้ไข Migration ที่สร้างขึ้นเพิ่มเติมเอง
 
